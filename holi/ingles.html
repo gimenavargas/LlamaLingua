@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Detector Inglés desde Galería</title>
+    <style>
+        .galeria {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .galeria img {
+            max-width: 150px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border 0.3s;
+        }
+        .galeria img:hover {
+            border: 2px solid blue;
+        }
+        #resultado {
+            font-size: 1.5em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Selecciona una Imagen</h1>
+
+    <div class="galeria">
+        <img src="imagenes/fal.jpg" alt="img1" onclick="procesarImagen(this)">
+        <img src="imagenes/miau.jpg" alt="img2" onclick="procesarImagen(this)">
+        <img src="imagenes/rosa.png" alt="img3" onclick="procesarImagen(this)">
+    </div>
+
+    <p id="resultado">Resultado: </p>
+
+    <script>
+        function procesarImagen(img) {
+            const resultado = document.getElementById('resultado');
+            resultado.innerText = "Procesando...";
+
+            fetch(img.src)
+                .then(res => {
+                    if (!res.ok) throw new Error('Error al cargar imagen: ' + res.status);
+                    return res.blob();
+                })
+                .then(blob => {
+                    const formData = new FormData();
+                    formData.append('image', blob, "imagen.jpg");
+
+                    return fetch('http://localhost/holi/api_ingles.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                })
+                .then(async res => {
+                    if (!res.ok) {
+                        const text = await res.text();
+                        throw new Error(`HTTP ${res.status}: ${text}`);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    const traduccion = data.object || data.error || 'Sin respuesta del servidor';
+                    resultado.innerText = "Traducción: " + traduccion;
+
+                    if (data.object) {
+                        hablar(data.object);
+                    }
+                })
+                .catch(err => {
+                    console.error("Error en la solicitud:", err);
+                    resultado.innerText = "Error en la solicitud: " + err.message;
+                });
+        }
+
+        function hablar(texto) {
+            const mensaje = new SpeechSynthesisUtterance(texto);
+            mensaje.lang = "en-US";
+            speechSynthesis.speak(mensaje);
+        }
+    </script>
+</body>
+</html>

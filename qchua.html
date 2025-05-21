@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="qu">
+<head>
+  <meta charset="UTF-8">
+  <title>Rikch’ariy – Rikuy ima</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f2f2f2;
+    }
+    h1 {
+      color: #333;
+    }
+    #result {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: green;
+    }
+    input[type="file"] {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rikch’ariy ima rikhuykita</h1>
+  <input type="file" id="imageInput" accept="image/*">
+  <button onclick="sendImage()">Rikuy</button>
+  <p id="result"></p>
+
+  <script>
+    function sendImage() {
+      const input = document.getElementById('imageInput');
+      const file = input.files[0];
+      if (!file) {
+        alert("Ama qichuychu – imaymana rikhuyta chaskiy.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      fetch("http://192.168.105.30:5000/detect", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.objeto) {
+          document.getElementById("result").textContent = "Rikurqan: " + data.objeto;
+        } else {
+          document.getElementById("result").textContent = "Manan atinqachu rikuyta.";
+        }
+      })
+      .catch(error => {
+        console.error("Pantay:", error);
+        document.getElementById("result").textContent = "Pantay karqan ima rikhuyta apachinapaq.";
+      });
+    }
+  </script>
+</body>
+</html>
+
+
