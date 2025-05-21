@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reconocimiento de Objetos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f2f2f2;
+    }
+    h1 {
+      color: #333;
+    }
+    #result {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: green;
+    }
+    input[type="file"] {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Reconocimiento de Objetos en Imagen</h1>
+  <input type="file" id="imageInput" accept="image/*">
+  <button onclick="sendImage()">Detectar Objeto</button>
+  <p id="result"></p>
+
+  <script>
+    function sendImage() {
+      const input = document.getElementById('imageInput');
+      const file = input.files[0];
+      if (!file) {
+        alert("Por favor selecciona una imagen.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      fetch("http://localhost:5000/detect", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.object) {
+          document.getElementById("result").textContent = "Objeto detectado: " + data.object;
+        } else {
+          document.getElementById("result").textContent = "No se pudo detectar el objeto.";
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        document.getElementById("result").textContent = "Error al enviar la imagen.";
+      });
+    }
+  </script>
+</body>
+</html>
